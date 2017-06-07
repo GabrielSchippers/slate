@@ -19,80 +19,66 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+### API Base
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+`https://lift.co/api/v2`
 
-This example API documentation page was created with [Slate](https://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
+The Lift API has many endpoints, or resources. For example `https://lift.co/api/v2/products` where /products is a resource.
+
+GET Queries to most resources include query paramaters to support advanced queries, paging, sorting, population and more.
+
+> An example of an advanced query using query params:
+
+```shell
+# Note: We use --data-urlencode to build query paramters and escape quotes for the query properties json string
+curl -G "https://staging.lift.co/api/v2/products" \
+  --data-urlencode 'query={"__t": "Oil"}' \
+  --data-urlencode 'page=1' \
+  --data-urlencode 'per_page=2'
+```
 
 # Authentication
 
 > To authorize, use this code:
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
 ```shell
 # With shell, you can just pass the correct header with each request
 curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+  -H "Authorization: Bearer token"
 ```
 
-```javascript
-const kittn = require('kittn');
+> Make sure to replace `token` with your JSON Web Token.
 
-let api = kittn.authorize('meowmeowmeow');
-```
+Some requests required authentication. The Lift API uses JSON Web Tokens. To get a token, we make a POST request to /auth with a valid email and password. On successful authentication the server repsonse body will include a property called token which you can pass the value of in future requests in a standard Authorization: Bearer header.
 
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`Authorization: Bearer token`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>token</code> with your personal API key.
 </aside>
+
+# Pagination
+GET queries made to the base paths of some resources are wrapped in a paging body. It has the properties `hits`, `page`, `per_page`, `count`, `pages`, where `hits` is an array of matching documents. Responses will not be wrapped in paging bodies when making a `distinct` call, or using `op="count"` or  `op="aggregate"` as these are not regular quieries that can be paged. To remove the paging body and just return an array of matching documents use [`flat`](#flat).
+
+> A paged query returns JSON structured like this:
+
+```json
+{
+    hits: [...],
+    page: 1,
+    per_page: 10,
+    count: 1000,
+    pages: 100
+}
+```
 
 # Kittens
 
 ## Get All Kittens
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
-
 ```shell
 curl "http://example.com/api/kittens"
   -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
 ```
 
 > The above command returns JSON structured like this:
